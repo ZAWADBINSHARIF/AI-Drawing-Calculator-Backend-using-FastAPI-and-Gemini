@@ -9,6 +9,7 @@ genai.configure(api_key=settings.GEMINI_SECRET_KEY)
 
 
 def analyze_image(img: Image, dict_of_vars: dict):
+
     model = genai.GenerativeModel(model_name="gemini-1.5-flash")
     dict_of_vars_str = json.dumps(dict_of_vars, ensure_ascii=False)
     prompt = (
@@ -34,16 +35,19 @@ def analyze_image(img: Image, dict_of_vars: dict):
     )
 
     response = model.generate_content([prompt, img])
-    print(response.text)
     answers = []
+
     try:
         answers = ast.literal_eval(response.text)
     except Exception as e:
         print(f"Error in parsing response from Gemini API: {e}")
-    print("returned answer ", answers)
+
+    # print("returned answer ", answers)
+
     for answer in answers:
         if "assign" in answer:
             answer["assign"] = True
         else:
             answer["assign"] = False
+
     return answers

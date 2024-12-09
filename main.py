@@ -1,5 +1,5 @@
 # For running the FastAPI, write the command in the terminal
-# uvicorn main:app --host 0.0.0.0 --port 4000
+# uvicorn main:app --host 0.0.0.0 --port 4000 --reload
 
 from io import BytesIO
 from fastapi import FastAPI
@@ -9,7 +9,7 @@ from contextlib import asynccontextmanager
 from PIL import Image
 
 from schema import ImageData
-from utilities import analyze_image
+from utilities.analyze_image import analyze_image
 
 
 @asynccontextmanager
@@ -41,6 +41,16 @@ async def calculation(data: ImageData):
     image_bytes = BytesIO(image_data)
     image = Image.open(image_bytes)
     responses = analyze_image(image, dict_of_vars=data.dict_of_vars)
+
+    print(responses)
+
+    # responses = [
+    #     {
+    #         "expr": "Time taken for a car moving at 20 m/s to cover 45 m",
+    #         "result": "2.25 seconds",
+    #         "assign": False,
+    #     }
+    # ]
 
     data = []
     for response in responses:
