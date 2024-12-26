@@ -1,12 +1,17 @@
 # For running the FastAPI, write the command in the terminal
 # uvicorn main:app --host 0.0.0.0 --port 4000 --reload
 
+import asyncio
 from io import BytesIO
 from fastapi import FastAPI
 import base64
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 from PIL import Image
+import uvicorn
+import uvicorn.config
+import uvicorn.server
+from constants.constants import settings
 
 from schema import ImageData
 from utilities.analyze_image import analyze_image
@@ -21,7 +26,7 @@ app = FastAPI(lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:8081", "http://192.168.0.105:8081"],
+    allow_origins=["http://localhost:8081", "http://192.168.0.101:8081"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -30,7 +35,7 @@ app.add_middleware(
 
 @app.get("/")
 async def health():
-
+    print(settings.GenKey)
     return {"message": f"Server is running..."}
 
 
@@ -39,18 +44,11 @@ async def calculation(data: ImageData):
 
     image_data = base64.b64decode(data.image)
     image_bytes = BytesIO(image_data)
-    image = Image.open(image_bytes)
+    image = Image.open(image_bytes)  # image_name.png
+
     responses = analyze_image(image, dict_of_vars=data.dict_of_vars)
 
     print(responses)
-
-    # responses = [
-    #     {
-    #         "expr": "Time taken for a car moving at 20 m/s to cover 45 m",
-    #         "result": "2.25 seconds",
-    #         "assign": False,
-    #     }
-    # ]
 
     data = []
     for response in responses:
@@ -58,3 +56,15 @@ async def calculation(data: ImageData):
 
     # print("response in route: ", responses)
     return {"message": "Image processed", "data": data, "status": "success"}
+
+
+async def main():
+    config = uvicorn.Config(
+        "main:app", host="0.0.0.0", port=4000, log_level="info", reload=True
+    )
+    server = uvicorn.Server(config)
+    await server.serve()
+
+
+if __name__ == "__main__":
+    asyncio.run(main())

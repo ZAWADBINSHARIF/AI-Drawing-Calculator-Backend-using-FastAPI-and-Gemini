@@ -2,7 +2,7 @@ import json
 import google.generativeai as genai
 import ast
 from PIL import Image
-from constants import settings
+from constants.constants import settings
 
 
 genai.configure(api_key=settings.GEMINI_SECRET_KEY)
@@ -41,6 +41,7 @@ def analyze_image(img: Image, dict_of_vars: dict):
         answers = ast.literal_eval(response.text)
     except Exception as e:
         print(f"Error in parsing response from Gemini API: {e}")
+        return []
 
     # print("returned answer ", answers)
 
